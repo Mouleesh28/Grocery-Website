@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grocery Delivery App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo"><i class="fas fa-shopping-cart"></i> Gayathiri Grocery Mart</h1>
+            <div class="nav-links">
+                <a data-i18n="navHome" href="#" onclick="showPage('home')"><i class="fas fa-home"></i> Home</a>
+                <a data-i18n="navProducts" href="#" onclick="showPage('products')"><i class="fas fa-box"></i> Products</a>
+                <a data-i18n="navOrders" href="#" onclick="showPage('orders')"><i class="fas fa-receipt"></i> Orders</a>
+                <a id="shopDashLink" style="display:none;" href="#" onclick="showPage('shopDash')"><i class="fas fa-store"></i> Shop Dashboard</a>
+                <a id="adminAnalyticsLink" href="admin-dashboard.html" title="Go to Admin Dashboard" style="display:none;"><i class="fas fa-chart-bar"></i> Analytics</a>
+                <select id="langSelect" aria-label="Language">
+                    <option value="en">English</option>
+                    <option value="hi">हिन्दी</option>
+                    <option value="ta">தமிழ்</option>
+                </select>
+                <span id="userInfo" style="display:none; cursor:pointer;" title="View customer info" onclick="openCustomerModal()"><i class="fas fa-user-circle"></i> <span id="userRole"></span></span>
+                <button id="authBtn" onclick="showPage('login')"><i class="fas fa-sign-in-alt"></i> Login</button>
+                <button id="registerNavBtn" onclick="showPage('login'); switchTab('register')"><i class="fas fa-user-plus"></i> Register</button>
+                <button id="cartNavBtn" onclick="toggleCart()"><i class="fas fa-shopping-cart"></i> Cart <span id="cartCount" class="cart-badge">0</span></button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Home Page -->
+        <div id="homePage" class="page active">
+            <div class="video-background" aria-hidden="true">
+                <video autoplay muted loop playsinline>
+                    <source src="https://cdn.pixabay.com/video/2023/05/09/160990-825265467_large.mp4" type="video/mp4">
+                </video>
+                <div class="video-overlay"></div>
+                <div class="video-vignette"></div>
+            </div>
+            <div class="hero home-layout">
+                <div class="hero-content">
+                    <h2 data-i18n="heroTitle">Welcome to Gayathiri Grocery Mart</h2>
+                    <p data-i18n="heroSubtitle">Fresh groceries delivered to your doorstep in minutes</p>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" onclick="showPage('products')" data-i18n="heroCTA"><i class="fas fa-search"></i> Browse Now</button>
+                        <button class="btn btn-secondary" onclick="showPage('orders')"><i class="fas fa-truck"></i> Track Orders</button>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-item">
+                            <span class="stat-value">12 min</span>
+                            <span class="stat-label">Avg delivery</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">500+</span>
+                            <span class="stat-label">Products</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">4.9★</span>
+                            <span class="stat-label">Customer rating</span>
+                        </div>
+                    </div>
+                    <div class="hero-features">
+                        <div class="feature-item" onclick="showPage('orders')">
+                            <i class="fas fa-shipping-fast"></i>
+                            <span data-i18n="featFast">Fast Delivery</span>
+                        </div>
+                        <div class="feature-item" onclick="showPage('products')">
+                            <i class="fas fa-leaf"></i>
+                            <span data-i18n="featFresh">Fresh Products</span>
+                        </div>
+                        <div class="feature-item" onclick="showPage('products')">
+                            <i class="fas fa-shield-alt"></i>
+                            <span data-i18n="featSecure">Secure Payment</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <section class="home-categories" aria-label="Shop by category">
+                <div class="section-head">
+                    <div>
+                        <h3>Shop by category</h3>
+                        <p>Tap a category to jump into fresh picks.</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="showPage('products')">View all</button>
+                </div>
+                <div class="category-cards-grid">
+                    <button class="category-card" onclick="showPage('products'); filterByCategory('fruits')" type="button">
+                        <span class="category-card-icon"><i class="fas fa-apple-alt"></i></span>
+                        <span class="category-card-label">Fruits</span>
+                    </button>
+                    <button class="category-card" onclick="showPage('products'); filterByCategory('vegetables')" type="button">
+                        <span class="category-card-icon"><i class="fas fa-carrot"></i></span>
+                        <span class="category-card-label">Vegetables</span>
+                    </button>
+                    <button class="category-card" onclick="showPage('products'); filterByCategory('grains')" type="button">
+                        <span class="category-card-icon"><i class="fas fa-bread-slice"></i></span>
+                        <span class="category-card-label">Grains</span>
+                    </button>
+                    <button class="category-card" onclick="showPage('products'); filterByCategory('dairy')" type="button">
+                        <span class="category-card-icon"><i class="fas fa-cheese"></i></span>
+                        <span class="category-card-label">Dairy</span>
+                    </button>
+                    <button class="category-card" onclick="showPage('products'); filterByCategory('oils')" type="button">
+                        <span class="category-card-icon"><i class="fas fa-pepper-hot"></i></span>
+                        <span class="category-card-label">Oils & Spices</span>
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Login/Register Page -->
+        <div id="loginPage" class="page">
+            <div class="auth-container">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('login')" data-i18n="tabLogin"><i class="fas fa-sign-in-alt"></i> Login</button>
+                    <button class="tab-btn" onclick="switchTab('register')" data-i18n="tabRegister"><i class="fas fa-user-plus"></i> Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <div id="loginForm" class="auth-form">
+                    <h3 data-i18n="loginTitle"><i class="fas fa-lock"></i> Login to Your Account</h3>
+                    <div class="input-group">
+                        <i class="fas fa-user-tag"></i>
+                        <select id="loginRole">
+                            <option value="customer">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="loginEmail" placeholder="Email address" data-i18n-placeholder="loginEmailPh" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="loginPassword" class="password-input" placeholder="Password" data-i18n-placeholder="loginPassPh" required>
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('loginPassword', this)" aria-label="Toggle password visibility">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="login()" data-i18n="loginBtn"><i class="fas fa-arrow-right"></i> Login</button>
+                    <p class="message" id="loginMessage"></p>
+                </div>
+
+                <!-- Register Form -->
+                <div id="registerForm" class="auth-form" style="display:none;">
+                    <h3 data-i18n="registerTitle"><i class="fas fa-user-plus"></i> Create Account</h3>
+                    <div class="input-group">
+                        <i class="fas fa-user-tag"></i>
+                        <select id="registerRole">
+                            <option value="customer">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="regName" placeholder="Full name" data-i18n-placeholder="regNamePh" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="regEmail" placeholder="Email address" data-i18n-placeholder="regEmailPh" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="regPassword" class="password-input" placeholder="Password" data-i18n-placeholder="regPassPh" required>
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('regPassword', this)" aria-label="Toggle password visibility">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" id="regPhone" placeholder="Phone number (10 digits)" required>
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="register()" data-i18n="registerBtn"><i class="fas fa-user-check"></i> Register</button>
+                    <p class="message" id="regMessage"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Page -->
+        <div id="productsPage" class="page">
+            <div class="page-header">
+                <div>
+                    <h1 style="font-size:28px; margin-bottom:5px;">Groceries & food</h1>
+                    <p class="page-subtitle" data-i18n="productsSubtitle">Browse our fresh collection</p>
+                </div>
+                <button id="addProductBtn" class="btn btn-secondary" onclick="showAddProduct()" style="display:none;" data-i18n="addProductBtn"><i class="fas fa-plus"></i> Add Product</button>
+            </div>
+
+            <div class="product-search">
+                <div class="input-group">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="productSearchInput" placeholder="Search products..." data-i18n-placeholder="productSearchPh" autocomplete="off">
+                </div>
+                <button class="btn btn-secondary" id="productSearchClear" onclick="clearProductSearch()" data-i18n="clearSearch"><i class="fas fa-times"></i> Clear</button>
+            </div>
+            
+            <!-- Category Tabs -->
+            <div class="category-tabs">
+                <button class="category-tab active" onclick="filterByCategory('all')" data-category="all">All</button>
+                <button class="category-tab" onclick="filterByCategory('fruits')" data-category="fruits">Fruits</button>
+                <button class="category-tab" onclick="filterByCategory('vegetables')" data-category="vegetables">Vegetables</button>
+                <button class="category-tab" onclick="filterByCategory('grains')" data-category="grains">Grains</button>
+                <button class="category-tab" onclick="filterByCategory('dairy')" data-category="dairy">Dairy</button>
+                <button class="category-tab" onclick="filterByCategory('oils')" data-category="oils">Oils & Ghee</button>
+                <button class="category-tab" onclick="filterByCategory('makeup')" data-category="makeup">Makeup</button>
+                <button class="category-tab" onclick="filterByCategory('shampoos')" data-category="shampoos">Shampoos</button>
+            </div>
+
+            <!-- Add Product Modal (for shop/wholesale/admin users) -->
+            <div id="addProductModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="hideAddProduct()">&times;</span>
+                    <div id="addProductForm" class="form-card">
+                        <h3 data-i18n="addProductTitle"><i class="fas fa-plus-circle"></i> Add New Product</h3>
+                        <div class="form-row">
+                            <div class="input-group full">
+                                <i class="fas fa-tag"></i>
+                                <input type="text" id="productName" placeholder="Product Name" data-i18n-placeholder="productNamePh">
+                            </div>
+                            <div class="input-group full">
+                                <i class="fas fa-image"></i>
+                                <input type="text" id="productImage" placeholder="Image URL (optional)" data-i18n-placeholder="productImagePh">
+                            </div>
+                            <div class="input-group full">
+                                <i class="fas fa-layer-group"></i>
+                                <select id="productCategory">
+                                    <option value="" disabled selected>Select Category</option>
+                                    <option value="fruits">🍎 Fruits</option>
+                                    <option value="vegetables">🥕 Vegetables</option>
+                                    <option value="grains">🌾 Grains & Bread</option>
+                                    <option value="dairy">🥛 Dairy</option>
+                                    <option value="oils">🌶️ Oils & Spices</option>
+                                    <option value="makeup">💄 Makeup</option>
+                                    <option value="shampoos">🧴 Shampoos</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <i class="fas fa-dollar-sign"></i>
+                                <input type="number" id="productPrice" placeholder="Price (₹)" data-i18n-placeholder="productPricePh">
+                            </div>
+                            <div class="input-group">
+                                <i class="fas fa-boxes"></i>
+                                <input type="number" id="productStock" placeholder="Stock" data-i18n-placeholder="productStockPh">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-primary" onclick="addProduct()" data-i18n="saveProduct"><i class="fas fa-save"></i> Add Product</button>
+                            <button class="btn btn-secondary" onclick="hideAddProduct()" data-i18n="cancelBtn"><i class="fas fa-times"></i> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Product Modal (admin) -->
+            <div id="editProductModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="hideEditProduct()">&times;</span>
+                    <div class="form-card">
+                        <h3><i class="fas fa-pen"></i> Edit Product</h3>
+                        <div class="form-row">
+                            <div class="input-group full">
+                                <i class="fas fa-tag"></i>
+                                <input type="text" id="editProductName" placeholder="Product Name">
+                            </div>
+                            <div class="input-group">
+                                <i class="fas fa-dollar-sign"></i>
+                                <input type="number" id="editProductPrice" placeholder="Price (Rs.)">
+                            </div>
+                            <div class="input-group">
+                                <i class="fas fa-boxes"></i>
+                                <input type="number" id="editProductStock" placeholder="Stock">
+                            </div>
+                            <div class="input-group full">
+                                <i class="fas fa-image"></i>
+                                <input type="text" id="editProductImage" placeholder="Image URL">
+                            </div>
+                            <div class="full edit-image-preview-wrap">
+                                <p class="edit-image-preview-label">Image Preview</p>
+                                <img id="editProductImagePreview" class="edit-image-preview" src="" alt="Product preview">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-primary" onclick="saveProductEdits()"><i class="fas fa-save"></i> Save Changes</button>
+                            <button class="btn btn-secondary" onclick="hideEditProduct()"><i class="fas fa-times"></i> Cancel</button>
+                        </div>
+                        <p id="editProductMessage" class="message" style="margin-top: 10px;"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products List -->
+            <div id="productsList" class="products-grid"></div>
+        </div>
+
+        <!-- Orders Page -->
+        <div id="ordersPage" class="page">
+            <div class="page-header">
+                <div>
+                    <h2 data-i18n="ordersTitle"><i class="fas fa-receipt"></i> Your Orders</h2>
+                    <p class="page-subtitle" data-i18n="ordersSubtitle">Track your delivery status</p>
+                </div>
+            </div>
+            <div id="ordersList" class="orders-list"></div>
+        </div>
+
+        <!-- Shop Owner Dashboard Page -->
+        <div id="shopDashPage" class="page">
+            <div class="page-header">
+                <div>
+                    <h2><i class="fas fa-store"></i> Shop Dashboard</h2>
+                    <p class="page-subtitle">Approve and manage incoming orders</p>
+                </div>
+            </div>
+            <div class="shop-dash">
+                <div class="dash-column">
+                    <h3>Pending Approvals</h3>
+                    <div id="pendingOrders" class="orders-list"></div>
+                </div>
+                <div class="dash-column">
+                    <h3>All Orders</h3>
+                    <div class="dash-filters">
+                        <select id="statusFilter" onchange="renderShopOrders()">
+                            <option value="all">All</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                            <option value="Packed">Packed</option>
+                            <option value="Out for Delivery">Out for Delivery</option>
+                            <option value="Delivered">Delivered</option>
+                        </select>
+                    </div>
+                    <div id="allShopOrders" class="orders-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart -->
+        <div id="cartIcon" class="cart-icon" onclick="toggleCart()" title="View Cart">
+            <i class="fas fa-shopping-cart"></i>
+            <span id="cartCountFab">0</span>
+        </div>
+
+        <div id="cartModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="toggleCart()">&times;</span>
+                <h3 data-i18n="cartTitle"><i class="fas fa-shopping-bag"></i> Your Cart</h3>
+                <div id="cartItems"></div>
+                <div class="cart-total">
+                    <span data-i18n="cartTotalLabel">Total:</span>
+                    <strong>₹<span id="cartTotal">0</span></strong>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-credit-card"></i>
+                    <select id="paymentMode">
+                        <option value="cod" data-i18n="payCOD">💵 Cash on Delivery</option>
+                        <option value="online" data-i18n="payOnline">💳 Online Payment</option>
+                        <option value="gpay" data-i18n="payGPay">🟢 Google Pay (GPay)</option>
+                        <option value="phonepe" data-i18n="payPhonePe">🔵 PhonePe</option>
+                        <option value="paytm" data-i18n="payPaytm">🔷 Paytm</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary btn-full" onclick="placeOrder()" data-i18n="placeOrderBtn"><i class="fas fa-check-circle"></i> Place Order</button>
+            </div>
+        </div>
+
+        <!-- Customer Info Popup Modal -->
+        <div id="customerModal" class="modal">
+            <div class="modal-content" style="max-width: 520px;">
+                <span class="close" onclick="closeCustomerModal()">&times;</span>
+                <h3><i class="fas fa-user"></i> Customer Details</h3>
+                <div class="profile-info" style="margin-top: 10px;">
+                    <div class="profile-item">
+                        <label><i class="fas fa-user"></i> Name:</label>
+                        <span id="custName">Loading...</span>
+                    </div>
+                    <div class="profile-item">
+                        <label><i class="fas fa-envelope"></i> Email:</label>
+                        <span id="custEmail">Loading...</span>
+                    </div>
+                </div>
+                <div class="profile-actions" style="margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Assistant Chat Box -->
+    <div id="aiChatBox" class="ai-chat-box">
+        <div class="ai-header">
+            <h4 data-i18n="aiAssistant">🤖 AI Assistant</h4>
+            <button onclick="toggleAIChat()" class="ai-close" data-i18n="aiClose">Close</button>
+        </div>
+        <div id="aiMessages" class="ai-messages">
+            <div class="ai-msg bot" data-i18n="aiGreeting">Hello! How can I help you?</div>
+        </div>
+        <div class="ai-footer">
+            <input type="text" id="aiInput" class="ai-input" placeholder="Ask about products..." data-i18n-placeholder="aiAskProduct">
+            <button onclick="sendAIMessage()" class="ai-send" data-i18n="aiSendMsg">Send</button>
+        </div>
+    </div>
+
+    <!-- AI Assistant Icon -->
+    <button id="aiBtn" class="ai-btn" onclick="toggleAIChat()" title="AI Assistant">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <!-- Toast Notification -->
+    <div id="toast"></div>
+
+    <!-- Razorpay Checkout Script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

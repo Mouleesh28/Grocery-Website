@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Test Mode</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .brand h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .brand p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #ff6b6b;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .message.error {
+            background: #fee;
+            color: #c33;
+            display: block;
+        }
+
+        .message.success {
+            background: #efe;
+            color: #3c3;
+            display: block;
+        }
+
+        .info-box {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #555;
+            border-radius: 3px;
+        }
+
+        .info-box strong {
+            color: #333;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="brand">
+            <h1>🏦 Admin</h1>
+            <p>Test Mode - Any Credentials</p>
+            <span class="badge">TEST MODE</span>
+        </div>
+
+        <div class="info-box">
+            <strong>⚡ Quick Login:</strong><br>
+            Enter any email and password to access the admin dashboard
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="Enter any email" required value="admin@test.com">
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter any password" required value="Test@123">
+        </div>
+
+        <button class="login-btn" onclick="testLogin()">Login to Dashboard</button>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Logging in...</p>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #999;">
+            <p>Port 6000 - Test Admin Login</p>
+            <p>No actual validation required</p>
+        </div>
+    </div>
+
+    <script>
+        function testLogin() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const messageEl = document.getElementById('message');
+            const loadingEl = document.getElementById('loading');
+
+            if (!email || !password) {
+                messageEl.textContent = '❌ Please fill all fields';
+                messageEl.className = 'message error';
+                return;
+            }
+
+            // Show loading
+            loadingEl.style.display = 'block';
+            messageEl.style.display = 'none';
+
+            // Simulate login delay
+            setTimeout(() => {
+                // Create a mock token
+                const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InRlc3RhZG1pbiIsInJvbGUiOiJhZG1pbiIsImlhdCI6' + Date.now() + '}.test_token_' + Math.random().toString(36).substr(2, 9);
+                
+                // Store in localStorage
+                localStorage.setItem('adminToken', mockToken);
+                localStorage.setItem('adminRole', 'admin');
+                localStorage.setItem('adminEmail', email);
+
+                messageEl.textContent = '✅ Login successful! Redirecting...';
+                messageEl.className = 'message success';
+                messageEl.style.display = 'block';
+                
+                loadingEl.style.display = 'none';
+
+                // Redirect to dashboard after 1 second
+                setTimeout(() => {
+                    window.location.href = '/admin-dashboard.html';
+                }, 1000);
+            }, 500);
+        }
+
+        // Allow Enter key to login
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                testLogin();
+            }
+        });
+    </script>
+</body>
+</html>

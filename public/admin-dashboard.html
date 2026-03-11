@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Analysis Dashboard - Admin Panel</title>
+    <link rel="stylesheet" href="admin-dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <h1>🛒 Grocery Admin Panel</h1>
+            </div>
+            <div class="navbar-menu">
+                <button class="nav-btn active" onclick="switchView('analytics')" id="analyticsBtn">📊 Analytics</button>
+                <button class="nav-btn" onclick="switchView('products')" id="productsBtn">➕ Products Management</button>
+                <button class="nav-btn logout-btn" onclick="logout()">🚪 Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Products View -->
+        <div id="productsView" class="view-container" style="display: none;">
+            <header class="dashboard-header">
+                <h2>📦 Product Management</h2>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="loadProductsList()">🔄 Refresh Products</button>
+                </div>
+            </header>
+
+            <!-- Low Stock Alerts Section -->
+            <section id="lowStockAlerts" class="low-stock-alerts-section" style="display: none;">
+                <div class="alert-header">
+                    <h3>⚠️ Low Stock Alerts</h3>
+                    <p class="alert-subtitle">Products with insufficient inventory</p>
+                </div>
+                <div id="lowStockContainer" class="low-stock-items">
+                    <!-- Low stock products will be populated here -->
+                </div>
+            </section>
+
+            <!-- Products List Section -->
+            <section class="products-list-section">
+                <h3>All Products</h3>
+                <div class="products-list-wrapper">
+                    <div id="productsTableContainer" class="products-table-container">
+                        <table class="products-list-table">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Category</th>
+                                    <th>Price (₹)</th>
+                                    <th>Stock Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsListBody">
+                                <tr>
+                                    <td colspan="5" class="text-center">Loading products...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Analytics View -->
+        <div id="analyticsView" class="view-container active">
+            <!-- Header Section -->
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <button class="btn btn-back" onclick="goBack()">⬅️ Back</button>
+                    <h2>Sales Analytics & Performance Metrics</h2>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="refreshBtn" onclick="refreshAllData()">🔄 Refresh Data</button>
+                    <select id="periodSelect" class="period-select" onchange="updateSalesTrends()">
+                        <option value="daily">Daily Trends</option>
+                        <option value="monthly">Monthly Trends</option>
+                    </select>
+                </div>
+            </header>
+
+            <!-- Loading Indicator -->
+        <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+            <div class="spinner"></div>
+            <p>Loading analytics data...</p>
+        </div>
+
+        <!-- Summary Cards -->
+        <section class="summary-section">
+            <div class="summary-card">
+                <div class="card-icon total-sales">📦</div>
+                <div class="card-content">
+                    <h3>Total Orders</h3>
+                    <p class="card-value" id="totalOrders">0</p>
+                    <span class="card-subtitle">Completed Orders</span>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="card-icon total-revenue">💰</div>
+                <div class="card-content">
+                    <h3>Total Revenue</h3>
+                    <p class="card-value" id="totalRevenue">₹0</p>
+                    <span class="card-subtitle">All-time revenue</span>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="card-icon avg-order">📊</div>
+                <div class="card-content">
+                    <h3>Avg Order Value</h3>
+                    <p class="card-value" id="avgOrderValue">₹0</p>
+                    <span class="card-subtitle">Per order</span>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="card-icon total-products">🎯</div>
+                <div class="card-content">
+                    <h3>Products Sold</h3>
+                    <p class="card-value" id="totalProductsSold">0</p>
+                    <span class="card-subtitle">Units sold</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="charts-section">
+            <!-- Product-wise Sales Chart -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>📊 Product-wise Sales</h3>
+                    <p class="chart-subtitle">Top 15 products by quantity sold</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="productSalesChart"></canvas>
+                </div>
+            </div>
+
+
+        </section>
+
+        <!-- Sales Trends Chart -->
+        <section class="charts-section">
+            <div class="chart-container full-width">
+                <div class="chart-header">
+                    <h3>📈 Sales Trends</h3>
+                    <p class="chart-subtitle" id="trendsSubtitle">Daily sales performance</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="salesTrendsChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Best Selling Products Section -->
+        <section class="best-products-section">
+            <h3>⭐ Best Selling Products</h3>
+            <div class="products-table-wrapper">
+                <table class="products-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Qty Sold</th>
+                            <th>Total Revenue</th>
+                            <th>Avg Price</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bestProductsBody">
+                        <tr>
+                            <td colspan="6" class="text-center">Loading data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Category Breakdown Section -->
+        <section class="category-section">
+            <h3>📂 Category Breakdown</h3>
+            <div class="category-grid" id="categoryGrid">
+                <!-- Populated dynamically -->
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="dashboard-footer">
+            <p>&copy; 2026 Grocery Store Admin Panel | Last Updated: <span id="lastUpdated">--</span></p>
+        </footer>
+        </div>
+    </div>
+
+    <!-- Chart.js instances (global for debugging) -->
+    <script>
+        let charts = {
+            productSales: null,
+            categorySales: null,
+            salesTrends: null
+        };
+    </script>
+    <script src="admin-dashboard.js"></script>
+</body>
+</html>
