@@ -302,6 +302,10 @@ body {
     background-color: rgba(255, 87, 34, 0.1);
 }
 
+.card-icon.inventory-products {
+    background-color: rgba(156, 39, 176, 0.12);
+}
+
 .card-content h3 {
     font-size: 0.9rem;
     color: #999;
@@ -1224,6 +1228,7 @@ body {
     justify-content: space-between;
     align-items: flex-start;
     transition: all 0.2s ease;
+    cursor: pointer;
 }
 
 .low-stock-item:hover {
@@ -1309,4 +1314,79 @@ body {
     font-size: 0.85rem;
     font-weight: 700;
     color: #1a1a1a;
+}
+
+.admin-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.admin-modal-content {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 460px;
+    padding: 1.5rem;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.admin-modal-close {
+    position: absolute;
+    right: 10px;
+    top: 8px;
+    border: none;
+    background: transparent;
+    font-size: 1.6rem;
+    cursor: pointer;
+    color: #777;
+}
+
+.admin-modal-content h3 {
+    margin-bottom: 1rem;
+    color: #1a1a1a;
+}
+
+.admin-modal-form label {
+    display: block;
+    margin: 0.45rem 0 0.25rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.admin-modal-form input {
+    width: 100%;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.admin-modal-form input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.12);
+}
+
+.admin-modal-message {
+    min-height: 1.2rem;
+    margin: 0.7rem 0;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.admin-modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.8rem;
+}
+
+.admin-modal-actions .btn {
+    flex: 1;
 }

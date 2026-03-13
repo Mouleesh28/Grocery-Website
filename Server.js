@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -17,6 +19,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const connectDB = require("./config/db");
 connectDB();
+
+function getConfiguredRazorpayKeyId() {
+    return String(process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY || '').trim();
+}
+
+function getConfiguredRazorpayKeySecret() {
+    return String(process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_SECRET || process.env.RAZORPAY_SECRET_KEY || '').trim();
+}
+
+if (!getConfiguredRazorpayKeyId() || !getConfiguredRazorpayKeySecret()) {
+    console.warn('Warning: Razorpay keys are not configured. Online payment methods will fail until .env is set.');
+}
 
 // Seed default products
 async function seedProducts() {

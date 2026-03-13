@@ -130,6 +130,15 @@
                     <span class="card-subtitle">Units sold</span>
                 </div>
             </div>
+
+            <div class="summary-card">
+                <div class="card-icon inventory-products">📚</div>
+                <div class="card-content">
+                    <h3>Total Products</h3>
+                    <p class="card-value" id="totalInventoryProducts">0</p>
+                    <span class="card-subtitle">Items in inventory</span>
+                </div>
+            </div>
         </section>
 
         <!-- Charts Section -->
@@ -201,6 +210,32 @@
     </div>
 
     <!-- Chart.js instances (global for debugging) -->
+    <div id="lowStockEditModal" class="admin-modal" style="display: none;">
+        <div class="admin-modal-content">
+            <button class="admin-modal-close" onclick="closeLowStockEditModal()" aria-label="Close">&times;</button>
+            <h3>Update Low Stock Product</h3>
+            <div class="admin-modal-form">
+                <label for="lowStockEditName">Product Name</label>
+                <input type="text" id="lowStockEditName" placeholder="Product Name">
+
+                <label for="lowStockEditPrice">Price (Rs.)</label>
+                <input type="number" id="lowStockEditPrice" min="1" step="0.01" placeholder="Price">
+
+                <label for="lowStockEditStock">Stock</label>
+                <input type="number" id="lowStockEditStock" min="0" step="1" placeholder="Stock">
+
+                <label for="lowStockEditImage">Image URL</label>
+                <input type="text" id="lowStockEditImage" placeholder="Image URL">
+
+                <p id="lowStockEditMessage" class="admin-modal-message"></p>
+                <div class="admin-modal-actions">
+                    <button class="btn btn-primary" onclick="saveLowStockProductUpdate()">Save</button>
+                    <button class="btn btn-back" onclick="closeLowStockEditModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let charts = {
             productSales: null,

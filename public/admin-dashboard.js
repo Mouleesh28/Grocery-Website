@@ -31,6 +31,8 @@ const categoryColors = [
 const REALTIME_REFRESH_MS = 15000;
 let autoRefreshTimer = null;
 let isDashboardRefreshing = false;
+let productsListCache = [];
+let editingLowStockProductId = null;
 
 /**
  * Initialize dashboard on page load
@@ -121,6 +123,31 @@ function formatNumber(num) {
     return new Intl.NumberFormat('en-IN').format(Math.round(num));
 }
 
+function normalizeCategoryKey(name) {
+    return String(name || 'uncategorized').trim().toLowerCase();
+}
+
+function toCategoryLabel(name) {
+    return String(name || 'Uncategorized')
+        .replace(/[-_]+/g, ' ')
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function buildInventoryMetrics(products) {
+    const safeProducts = Array.isArray(products) ? products : [];
+    const categoryCounts = {};
+
+    safeProducts.forEach((product) => {
+        const key = normalizeCategoryKey(product.category);
+        categoryCounts[key] = (categoryCounts[key] || 0) + 1;
+    });
+
+    return {
+        totalProducts: safeProducts.length,
+        categoryCounts
+    };
+}
+
 /**
  * Fetch all dashboard data
  */
@@ -139,14 +166,15 @@ async function loadDashboardData(force = false) {
         };
 
         // Fetch data in parallel
-        const [analyticsRes, productSalesRes, categorySalesRes, trendsRes] = await Promise.all([
+        const [analyticsRes, productSalesRes, categorySalesRes, trendsRes, productsRes] = await Promise.all([
             fetch(`${API_BASE}/analytics`, { headers }),
             fetch(`${API_BASE}/product-sales`, { headers }),
             fetch(`${API_BASE}/category-sales`, { headers }),
-            fetch(`${API_BASE}/sales-trends?period=daily`, { headers })
+            fetch(`${API_BASE}/sales-trends?period=daily`, { headers }),
+            fetch(`${API_ROOT}/products`, { headers })
         ]);
 
-        if (!analyticsRes.ok || !productSalesRes.ok || !categorySalesRes.ok || !trendsRes.ok) {
+        if (!analyticsRes.ok || !productSalesRes.ok || !categorySalesRes.ok || !trendsRes.ok || !productsRes.ok) {
             throw new Error('Failed to fetch analytics data');
         }
 
@@ -154,9 +182,11 @@ async function loadDashboardData(force = false) {
         const productSales = await productSalesRes.json();
         const categorySales = await categorySalesRes.json();
         const trends = await trendsRes.json();
+        const products = await productsRes.json();
+        const inventoryMetrics = buildInventoryMetrics(products);
 
         // Update summary cards
-        updateSummaryCards(analytics.summary);
+        updateSummaryCards(analytics.summary, inventoryMetrics.totalProducts);
 
         // Update charts
         updateProductSalesChart(productSales);
@@ -166,7 +196,7 @@ async function loadDashboardData(force = false) {
         updateBestProductsTable(analytics.bestSellingProducts);
 
         // Update category breakdown
-        updateCategoryBreakdown(analytics.categoryDistribution);
+        updateCategoryBreakdown(analytics.categoryDistribution, inventoryMetrics.categoryCounts);
 
         // Update timestamp
         updateTimestamp();
@@ -198,11 +228,15 @@ async function refreshAllData() {
 /**
  * Update summary cards with metrics
  */
-function updateSummaryCards(summary) {
+function updateSummaryCards(summary, totalInventoryProducts = 0) {
     document.getElementById('totalOrders').textContent = formatNumber(summary.totalOrders);
     document.getElementById('totalRevenue').textContent = formatCurrency(summary.totalRevenue);
     document.getElementById('avgOrderValue').textContent = formatCurrency(summary.avgOrderValue);
     document.getElementById('totalProductsSold').textContent = formatNumber(summary.totalProductsSold);
+    const totalInventoryNode = document.getElementById('totalInventoryProducts');
+    if (totalInventoryNode) {
+        totalInventoryNode.textContent = formatNumber(totalInventoryProducts);
+    }
 }
 
 /**
@@ -481,22 +515,57 @@ function updateBestProductsTable(products) {
 /**
  * Update category breakdown section
  */
-function updateCategoryBreakdown(categories) {
+function updateCategoryBreakdown(categories, categoryCounts = {}) {
     const grid = document.getElementById('categoryGrid');
     grid.innerHTML = '';
 
-    categories.forEach((cat, index) => {
+    const salesRows = Array.isArray(categories) ? categories : [];
+    const mergedMap = {};
+
+    salesRows.forEach((cat) => {
+        const key = normalizeCategoryKey(cat.name);
+        mergedMap[key] = {
+            name: key,
+            quantity: Number(cat.quantity) || 0,
+            revenue: Number(cat.revenue) || 0,
+            productsCount: Number(categoryCounts[key]) || 0
+        };
+    });
+
+    Object.entries(categoryCounts).forEach(([key, count]) => {
+        if (!mergedMap[key]) {
+            mergedMap[key] = {
+                name: key,
+                quantity: 0,
+                revenue: 0,
+                productsCount: Number(count) || 0
+            };
+        }
+    });
+
+    const mergedCategories = Object.values(mergedMap)
+        .sort((a, b) => b.productsCount - a.productsCount || b.quantity - a.quantity);
+
+    if (mergedCategories.length === 0) {
+        grid.innerHTML = '<p class="text-center">No category data available</p>';
+        return;
+    }
+
+    mergedCategories.forEach((cat, index) => {
         const card = document.createElement('div');
         card.className = 'category-card';
         card.style.borderLeftColor = categoryColors[index % categoryColors.length];
-        
-        const categoryName = cat.name.charAt(0).toUpperCase() + cat.name.slice(1);
+        const categoryName = toCategoryLabel(cat.name);
         
         card.innerHTML = `
             <div class="category-header">
                 <h4>${categoryName}</h4>
             </div>
             <div class="category-stats">
+                <div class="stat">
+                    <span class="stat-label">Products Count</span>
+                    <span class="stat-value">${formatNumber(cat.productsCount)}</span>
+                </div>
                 <div class="stat">
                     <span class="stat-label">Quantity Sold</span>
                     <span class="stat-value">${formatNumber(cat.quantity)}</span>
@@ -588,6 +657,7 @@ async function loadProductsList() {
         }
         
         const products = await response.json();
+        productsListCache = products;
         displayProductsList(products);
         displayLowStockAlerts(products);
     } catch (error) {
@@ -601,14 +671,12 @@ async function loadProductsList() {
  * Get stock status and severity
  */
 function getStockStatus(stock) {
-    if (stock < 5) {
-        return { level: 'critical', label: '🔴 Critical', badge: 'critical' };
-    } else if (stock < 15) {
-        return { level: 'warning', label: '🟡 Low Stock', badge: 'warning' };
+    if (stock < 15) {
+        return { level: 'low', label: 'Low', badge: 'critical' };
     } else if (stock < 30) {
-        return { level: 'medium', label: '🟢 Medium', badge: 'normal' };
+        return { level: 'medium', label: 'Medium', badge: 'warning' };
     } else {
-        return { level: 'healthy', label: '✅ Healthy', badge: 'normal' };
+        return { level: 'high', label: 'High', badge: 'normal' };
     }
 }
 
@@ -634,7 +702,7 @@ function displayLowStockAlerts(products) {
         const fillPercentage = Math.min(product.stock / 15 * 100, 100);
         
         return `
-            <div class="low-stock-item ${status.badge}">
+            <div class="low-stock-item ${status.badge}" onclick="openLowStockEditModal('${product._id}')">
                 <div class="low-stock-item-details">
                     <div class="low-stock-item-name">${product.name}</div>
                     <div class="low-stock-item-stock">
@@ -648,6 +716,105 @@ function displayLowStockAlerts(products) {
             </div>
         `;
     }).join('');
+}
+
+function openLowStockEditModal(productId) {
+    const modal = document.getElementById('lowStockEditModal');
+    const nameInput = document.getElementById('lowStockEditName');
+    const priceInput = document.getElementById('lowStockEditPrice');
+    const stockInput = document.getElementById('lowStockEditStock');
+    const imageInput = document.getElementById('lowStockEditImage');
+    const messageEl = document.getElementById('lowStockEditMessage');
+
+    if (!modal || !nameInput || !priceInput || !stockInput || !imageInput || !messageEl) {
+        return;
+    }
+
+    const product = productsListCache.find((item) => String(item._id) === String(productId));
+    if (!product) {
+        alert('Product not found');
+        return;
+    }
+
+    editingLowStockProductId = productId;
+    nameInput.value = product.name || '';
+    priceInput.value = product.price ?? 0;
+    stockInput.value = product.stock ?? 0;
+    imageInput.value = product.image || '';
+    messageEl.textContent = '';
+    messageEl.style.color = '';
+    modal.style.display = 'flex';
+}
+
+function closeLowStockEditModal() {
+    const modal = document.getElementById('lowStockEditModal');
+    const messageEl = document.getElementById('lowStockEditMessage');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    if (messageEl) {
+        messageEl.textContent = '';
+        messageEl.style.color = '';
+    }
+    editingLowStockProductId = null;
+}
+
+async function saveLowStockProductUpdate() {
+    if (!editingLowStockProductId) {
+        return;
+    }
+
+    const name = (document.getElementById('lowStockEditName').value || '').trim();
+    const price = Number(document.getElementById('lowStockEditPrice').value);
+    const stock = Number(document.getElementById('lowStockEditStock').value);
+    const image = (document.getElementById('lowStockEditImage').value || '').trim();
+    const messageEl = document.getElementById('lowStockEditMessage');
+
+    if (!name) {
+        messageEl.textContent = 'Please enter product name';
+        messageEl.style.color = '#d32f2f';
+        return;
+    }
+    if (!Number.isFinite(price) || price <= 0) {
+        messageEl.textContent = 'Please enter valid price';
+        messageEl.style.color = '#d32f2f';
+        return;
+    }
+    if (!Number.isFinite(stock) || stock < 0 || !Number.isInteger(stock)) {
+        messageEl.textContent = 'Please enter valid stock';
+        messageEl.style.color = '#d32f2f';
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+        const response = await fetch(`${API_ROOT}/products/${editingLowStockProductId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name, price, stock, image })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            messageEl.textContent = data.message || 'Failed to update product';
+            messageEl.style.color = '#d32f2f';
+            return;
+        }
+
+        messageEl.textContent = 'Product updated successfully';
+        messageEl.style.color = '#2e7d32';
+        setTimeout(() => {
+            closeLowStockEditModal();
+            loadProductsList();
+        }, 700);
+    } catch (error) {
+        console.error('Error updating low stock product:', error);
+        messageEl.textContent = 'Failed to update product';
+        messageEl.style.color = '#d32f2f';
+    }
 }
 
 /**

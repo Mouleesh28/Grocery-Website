@@ -183,10 +183,15 @@ router.put("/:id/price", async (req, res) => {
 router.put("/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const { price, stock, image } = req.body;
+        const { name, price, stock, image } = req.body;
 
+        const nextName = typeof name === "string" ? name.trim() : "";
         const nextPrice = Number(price);
         const nextStock = Number(stock);
+
+        if (!nextName) {
+            return res.status(400).json({ message: "Product name is required" });
+        }
 
         if (!Number.isFinite(nextPrice) || nextPrice <= 0) {
             return res.status(400).json({ message: "Valid price is required" });
@@ -197,6 +202,7 @@ router.put("/:id", async (req, res) => {
         }
 
         const updates = {
+            name: nextName,
             price: nextPrice,
             stock: nextStock
         };

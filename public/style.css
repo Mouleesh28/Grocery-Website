@@ -1282,7 +1282,10 @@ body::before {
 
 .cart-item {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "details total"
+        "remove remove";
     align-items: center;
     padding: 18px;
     border: 2px solid #e2e8f0;
@@ -1300,8 +1303,9 @@ body::before {
 
 /* Cart Item Details Section */
 .cart-item-details {
+    grid-area: details;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(140px, 1fr) auto;
     align-items: center;
     gap: 16px;
 }
@@ -1310,13 +1314,19 @@ body::before {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    min-width: 150px;
+    min-width: 140px;
 }
 
 .item-name {
     color: #2d3748;
     font-size: 16px;
     font-weight: 700;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: normal;
+    overflow-wrap: break-word;
+    line-height: 1.3;
 }
 
 .item-price {
@@ -1388,14 +1398,19 @@ body::before {
 }
 
 .total-price {
+    grid-area: total;
     color: #667eea;
     font-size: 18px;
     font-weight: 800;
     min-width: 64px;
     text-align: right;
+    justify-self: end;
 }
 
 .btn-remove {
+    grid-area: remove;
+    justify-self: center;
+    align-self: end;
     background: #f56565;
     color: white;
     border: none;
@@ -1543,6 +1558,53 @@ body::before {
 .order-status.completed {
     background: linear-gradient(135deg, #06ffa5 0%, #00d084 100%);
     color: white;
+}
+
+.order-status.approved,
+.order-status.delivered {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: white;
+}
+
+.order-status.rejected {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+.order-status.packed,
+.order-status.out-for-delivery {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+}
+
+.payment-status {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.payment-status.pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.payment-status.completed {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.payment-status.failed {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.payment-status.cancelled {
+    background: #e5e7eb;
+    color: #374151;
 }
 
 /* Pages Animation */
@@ -2317,6 +2379,101 @@ body {
 
 .category-cards-grid {
     gap: 16px;
+}
+
+/* Popular Categories horizontal scroll row */
+.popular-categories-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.popular-categories-row {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 12px 4px 16px;
+    scrollbar-width: none;
+    flex: 1;
+    -webkit-overflow-scrolling: touch;
+}
+
+.popular-categories-row::-webkit-scrollbar {
+    display: none;
+}
+
+.pop-cat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    min-width: 90px;
+    padding: 0;
+    font-family: inherit;
+    transition: transform 0.18s;
+}
+
+.pop-cat-item:hover {
+    transform: translateY(-4px);
+}
+
+.pop-cat-img-wrap {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2.5px solid rgba(31, 122, 62, 0.18);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    background: #f5f7f5;
+    flex-shrink: 0;
+}
+
+.pop-cat-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.22s;
+}
+
+.pop-cat-item:hover .pop-cat-img-wrap img {
+    transform: scale(1.08);
+}
+
+.pop-cat-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.pop-cat-scroll-btn {
+    background: #fff;
+    border: 1.5px solid rgba(31, 122, 62, 0.25);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--app-brand);
+    flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    font-size: 14px;
+    transition: background 0.18s, box-shadow 0.18s;
+}
+
+.pop-cat-scroll-btn:hover {
+    background: var(--app-brand);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(31, 122, 62, 0.3);
 }
 
 .category-card {

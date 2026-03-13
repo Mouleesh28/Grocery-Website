@@ -53,10 +53,7 @@ const translations = {
         cartTitle: 'Your Cart',
         cartTotalLabel: 'Total:',
         payCOD: '💵 Cash on Delivery',
-        payOnline: '💳 Online Payment',
-        payGPay: '🟢 Google Pay (GPay)',
-        payPhonePe: '🔵 PhonePe',
-        payPaytm: '🔷 Paytm',
+        payRazorpay: '💳 Razorpay',
         placeOrderBtn: 'Place Order',
         loginSuccess: 'Login successful!',
         loginFail: 'Login failed!',
@@ -123,10 +120,7 @@ const translations = {
         cartTitle: 'आपकी कार्ट',
         cartTotalLabel: 'कुल:',
         payCOD: '💵 कैश ऑन डिलीवरी',
-        payOnline: '💳 ऑनलाइन भुगतान',
-        payGPay: '🟢 गूगल पे (GPay)',
-        payPhonePe: '🔵 फोनपे',
-        payPaytm: '🔷 पेटीएम',
+        payRazorpay: '💳 रेज़रपे',
         placeOrderBtn: 'ऑर्डर करें',
         loginSuccess: 'लॉगिन सफल!',
         loginFail: 'लॉगिन विफल!',
@@ -193,10 +187,7 @@ const translations = {
         cartTitle: 'உங்கள் வண்டி',
         cartTotalLabel: 'மொத்தம்:',
         payCOD: '💵 காசோலை / COD',
-        payOnline: '💳 ஆன்லைன் கட்டணம்',
-        payGPay: '🟢 கூகுள் பே (GPay)',
-        payPhonePe: '🔵 போன்பே',
-        payPaytm: '🔷 பேடிஎம்',
+        payRazorpay: '💳 ரேசர்பே',
         placeOrderBtn: 'ஆர்டர் இடு',
         loginSuccess: 'உள்நுழைவு வெற்றி!',
         loginFail: 'உள்நுழைவு தோல்வி!',
@@ -298,9 +289,9 @@ const sampleProducts = [
     { name: 'Sunflower Oil (1L)', price: 150, stock: 30, category: 'oils', image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=800&q=80' },
     { name: 'Olive Oil (500ml)', price: 480, stock: 18, category: 'oils', image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=800&q=80' },
     { name: 'Ghee (500g)', price: 320, stock: 25, category: 'oils', image: 'https://images.unsplash.com/photo-1596040505149-c7998c523026?auto=format&fit=crop&w=800&q=80' },
-    { name: 'Turmeric Powder (100g)', price: 65, stock: 42, category: 'oils', image: 'https://images.unsplash.com/photo-1615485500134-275813583b6a?auto=format&fit=crop&w=800&q=80' },
-    { name: 'Chili Powder (100g)', price: 55, stock: 48, category: 'oils', image: 'https://images.unsplash.com/photo-1599789205460-47a0d6a6a4f1?auto=format&fit=crop&w=800&q=80' },
-    { name: 'Garam Masala (50g)', price: 85, stock: 35, category: 'oils', image: 'https://images.unsplash.com/photo-1596040033229-a0b5e8fc2ff7?auto=format&fit=crop&w=800&q=80' },
+    { name: 'Turmeric Powder (100g)', price: 65, stock: 42, category: 'spices', image: 'https://images.unsplash.com/photo-1615485500134-275813583b6a?auto=format&fit=crop&w=800&q=80' },
+    { name: 'Chili Powder (100g)', price: 55, stock: 48, category: 'spices', image: 'https://images.unsplash.com/photo-1599789205460-47a0d6a6a4f1?auto=format&fit=crop&w=800&q=80' },
+    { name: 'Garam Masala (50g)', price: 85, stock: 35, category: 'spices', image: 'https://images.unsplash.com/photo-1596040033229-a0b5e8fc2ff7?auto=format&fit=crop&w=800&q=80' },
     
     // Makeup (8 items)
     { name: 'Lipstick (24 shades)', price: 250, stock: 45, category: 'makeup', image: 'https://images.unsplash.com/photo-1599599810694-e5f8c1d7b4b5?auto=format&fit=crop&w=800&q=80' },
@@ -519,7 +510,10 @@ async function register() {
         document.getElementById('regMessage').style.color = 'green';
 
         updateAuthUI();
-        setTimeout(() => showPage('products'), 800);
+        setTimeout(() => {
+            loadProducts();
+            showPage('products');
+        }, 800);
     } catch (error) {
         document.getElementById('regMessage').textContent = t('regFail');
         document.getElementById('regMessage').style.color = 'red';
@@ -562,6 +556,7 @@ async function login() {
                 if (userRole_var === 'admin') {
                     window.location.href = 'admin-dashboard.html';
                 } else {
+                    loadProducts();
                     showPage('products');
                 }
             }, 1000);
@@ -690,7 +685,9 @@ function updateAuthUI() {
 // Products
 async function loadProducts() {
     try {
-        const response = await fetch(`${API_URL}/products`);
+        const response = await fetch(`${API_URL}/products?ts=${Date.now()}`, {
+            cache: 'no-store'
+        });
         const apiProducts = await response.json();
         console.log('API Products:', apiProducts);
         
@@ -717,10 +714,19 @@ function loadProductsFromSample() {
     renderProducts(sampleProducts);
 }
 
+// Detect if an 'oils' product is actually a spice/masala based on its name
+const SPICE_KEYWORDS = ['powder', 'masala', 'turmeric', 'chili', 'chilli', 'cumin', 'coriander', 'pepper', 'garam', 'spice', 'haldi', 'mirch', 'jeera'];
+function getEffectiveCategory(product) {
+    const cat = (product.category || '').toLowerCase();
+    const name = (product.name || '').toLowerCase();
+    if (cat === 'oils' && SPICE_KEYWORDS.some(kw => name.includes(kw))) return 'spices';
+    return cat;
+}
+
 function applyProductFilters(products) {
     let filtered = Array.isArray(products) ? [...products] : [];
     if (currentCategory !== 'all') {
-        filtered = filtered.filter(p => (p.category || '').toLowerCase() === currentCategory);
+        filtered = filtered.filter(p => getEffectiveCategory(p) === currentCategory);
     }
     if (currentSearchTerm) {
         const term = currentSearchTerm.toLowerCase();
@@ -750,13 +756,14 @@ function renderProducts(products) {
         'vegetables': { name: 'Vegetables 🥕', name_hi: 'सब्जियाँ 🥕', name_ta: 'காய்கறிகள் 🥕', products: [] },
         'grains': { name: 'Grains & Bread 🌾', name_hi: 'अनाज और ब्रेड 🌾', name_ta: 'தானியங்கள் 🌾', products: [] },
         'dairy': { name: 'Dairy 🥛', name_hi: 'डेयरी 🥛', name_ta: 'பால் பொருட்கள் 🥛', products: [] },
-        'oils': { name: 'Oils & Spices 🌶️', name_hi: 'तेल और मसाले 🌶️', name_ta: 'எண்ணெய்கள் 🌶️', products: [] },
+        'oils': { name: 'Oils & Ghee 🫙', name_hi: 'तेल और घी 🫙', name_ta: 'எண்ணெய் 🫙', products: [] },
+        'spices': { name: 'Spices & Masala 🌶️', name_hi: 'मसाले 🌶️', name_ta: 'மசாலா 🌶️', products: [] },
         'makeup': { name: 'Makeup 💄', name_hi: 'मेकअप 💄', name_ta: 'அழகு பொருட்கள் 💄', products: [] },
         'shampoos': { name: 'Shampoos 🧴', name_hi: 'शैंपू 🧴', name_ta: 'சாம்பு 🧴', products: [] }
     };
 
     filteredProducts.forEach(product => {
-        const cat = product.category || 'other';
+        const cat = getEffectiveCategory(product);
         if (categories[cat]) {
             categories[cat].products.push(product);
         }
@@ -791,6 +798,8 @@ function renderProducts(products) {
                     defaultImage = 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=800&q=80';
                 } else if (product.category === 'oils') {
                     defaultImage = 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=800&q=80';
+                } else if (product.category === 'spices') {
+                    defaultImage = 'https://images.unsplash.com/photo-1596040033229-a0b5e8fc2ff7?auto=format&fit=crop&w=800&q=80';
                 } else if (product.category === 'makeup') {
                     defaultImage = 'https://images.unsplash.com/photo-1607745882099-e1b7f6fb89d7?auto=format&fit=crop&w=800&q=80';
                 } else if (product.category === 'shampoos') {
@@ -1028,6 +1037,11 @@ function clearProductSearch() {
     } else {
         loadProducts();
     }
+}
+
+function scrollPopularCategories() {
+    const row = document.getElementById('popularCategoriesRow');
+    if (row) row.scrollBy({ left: 320, behavior: 'smooth' });
 }
 
 function filterByCategory(category) {
@@ -1355,13 +1369,15 @@ async function placeOrder() {
             });
 
             const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to place COD order');
+            }
             showToast(`${t('orderSuccess')} - ${t('payCOD')}`);
             cart = [];
             updateCartUI();
             toggleCart();
-        } else if (paymentMode === 'online' || paymentMode === 'gpay' || paymentMode === 'phonepe' || paymentMode === 'paytm') {
-            // All online payment methods use Razorpay
-            await initializeRazorpayPayment(totalAmount, paymentMode);
+        } else if (paymentMode === 'razorpay') {
+            await initializeRazorpayPayment(totalAmount, 'razorpay');
         } else {
             alert('Please select a valid payment method!');
         }
@@ -1372,8 +1388,12 @@ async function placeOrder() {
 }
 
 // Initialize Razorpay Payment
-async function initializeRazorpayPayment(totalAmount, paymentMethod = 'online') {
+async function initializeRazorpayPayment(totalAmount, paymentMethod = 'razorpay') {
     try {
+        if (typeof window.Razorpay !== 'function') {
+            throw new Error('Payment gateway failed to load. Refresh the page and try again.');
+        }
+
         // Step 1: Create payment order on backend
         const paymentOrderResponse = await fetch(`${API_URL}/orders/create-payment-order`, {
             method: 'POST',
@@ -1391,14 +1411,12 @@ async function initializeRazorpayPayment(totalAmount, paymentMethod = 'online') 
         console.log('Payment order response:', paymentOrder);
 
         if (!paymentOrderResponse.ok) {
-            throw new Error(paymentOrder.message || 'Failed to create payment order');
+            throw new Error(paymentOrder.error || paymentOrder.message || 'Failed to create payment order');
         }
 
-        // Determine payment method name
-        let paymentMethodName = 'Online Payment';
-        if (paymentMethod === 'gpay') paymentMethodName = 'Google Pay';
-        else if (paymentMethod === 'phonepe') paymentMethodName = 'PhonePe';
-        else if (paymentMethod === 'paytm') paymentMethodName = 'Paytm';
+        if (!paymentOrder.keyId || !paymentOrder.razorpayOrderId || !paymentOrder.orderId) {
+            throw new Error('Payment configuration is incomplete. Please contact support.');
+        }
 
         // Step 2: Open Razorpay Checkout
         const options = {
@@ -1406,7 +1424,7 @@ async function initializeRazorpayPayment(totalAmount, paymentMethod = 'online') 
             amount: totalAmount * 100,
             currency: "INR",
             name: "Gayathiri Grocery Mart",
-            description: `Order Payment via ${paymentMethodName}`,
+            description: "Order Payment via Razorpay",
             order_id: paymentOrder.razorpayOrderId,
             handler: async function(response) {
                 // Step 3: Verify payment on backend
@@ -1503,6 +1521,32 @@ function showToast(message, duration = 3000) {
     setTimeout(() => toast.classList.remove('show'), duration);
 }
 
+function normalizeStatusClass(value) {
+    return String(value || 'pending').toLowerCase().replace(/\s+/g, '-');
+}
+
+function formatPaymentStatus(value) {
+    if (!value) return 'Pending';
+    const normalized = String(value).toLowerCase();
+    if (normalized === 'completed') return 'Completed';
+    if (normalized === 'failed') return 'Failed';
+    if (normalized === 'cancelled') return 'Cancelled';
+    return 'Pending';
+}
+
+function formatOrderDateTime(createdAt) {
+    if (!createdAt) return 'N/A';
+    const date = new Date(createdAt);
+    if (Number.isNaN(date.getTime())) return 'N/A';
+    return date.toLocaleString('en-IN', {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
 // Orders
 async function loadOrders() {
     try {
@@ -1522,12 +1566,23 @@ async function loadOrders() {
         orders.forEach(order => {
             const orderCard = document.createElement('div');
             orderCard.className = 'order-card';
+            const itemsCount = Array.isArray(order.products) ? order.products.length : 0;
+            const productNames = Array.isArray(order.products)
+                ? order.products.map(p => p.name).join(', ')
+                : 'N/A';
+            const orderStatus = String(order.status || 'Pending');
+            const orderStatusClass = normalizeStatusClass(orderStatus);
+            const paymentStatus = formatPaymentStatus(order.paymentStatus);
+            const paymentStatusClass = normalizeStatusClass(paymentStatus);
             orderCard.innerHTML = `
                 <h4>Order #${order._id.substring(0, 8)}</h4>
-                <p><strong>Total:</strong> ₹${order.totalAmount}</p>
-                <p><strong>Payment:</strong> ${order.paymentMode}</p>
-                <p><strong>Status:</strong> <span class="order-status ${order.status.toLowerCase()}">${order.status}</span></p>
-                <p><strong>Items:</strong> ${order.products.length}</p>
+                <p><strong>Product Names:</strong> ${productNames}</p>
+                <p><strong>Items:</strong> ${itemsCount}</p>
+                <p><strong>Price:</strong> ₹${order.totalAmount}</p>
+                <p><strong>Payment Type:</strong> ${order.paymentMode}</p>
+                <p><strong>Delivery Status:</strong> <span class="order-status ${orderStatusClass}">${orderStatus}</span></p>
+                <p><strong>Payment Status:</strong> <span class="payment-status ${paymentStatusClass}">${paymentStatus}</span></p>
+                <p><strong>Time:</strong> ${formatOrderDateTime(order.createdAt)}</p>
             `;
             ordersList.appendChild(orderCard);
         });
@@ -1576,12 +1631,22 @@ function buildOrderCard(order, showApproveReject) {
     const card = document.createElement('div');
     card.className = 'order-card';
     const itemsCount = Array.isArray(order.products) ? order.products.length : 0;
+    const orderStatus = String(order.status || 'Pending');
+    const orderStatusClass = normalizeStatusClass(orderStatus);
+    const paymentStatus = formatPaymentStatus(order.paymentStatus);
+    const paymentStatusClass = normalizeStatusClass(paymentStatus);
+    const productNames = Array.isArray(order.products) 
+        ? order.products.map(p => p.name).join(', ') 
+        : 'N/A';
     card.innerHTML = `
         <h4>Order #${(order._id || '').toString().substring(0, 8)}</h4>
         <p><strong>Total:</strong> ₹${order.totalAmount}</p>
         <p><strong>Payment:</strong> ${order.paymentMode}</p>
-        <p><strong>Status:</strong> <span class="order-status ${String(order.status||'').toLowerCase()}">${order.status}</span></p>
+        <p><strong>Products:</strong> ${productNames}</p>
+        <p><strong>Status:</strong> <span class="order-status ${orderStatusClass}">${orderStatus}</span></p>
+        <p><strong>Payment Status:</strong> <span class="payment-status ${paymentStatusClass}">${paymentStatus}</span></p>
         <p><strong>Items:</strong> ${itemsCount}</p>
+        <p><strong>Ordered At:</strong> ${formatOrderDateTime(order.createdAt)}</p>
     `;
     const actions = document.createElement('div');
     actions.className = 'order-actions';

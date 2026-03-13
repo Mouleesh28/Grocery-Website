@@ -13,8 +13,8 @@ Your Gayathiri Grocery Mart app now has **real-time Razorpay payment integration
 ### 2. **Payment Workflow**
 ```
 Customer Clicks "Place Order" 
-    ↓
-Selects "Online Payment" mode
+  ↓
+Selects "Razorpay" mode
     ↓
 Backend creates Razorpay order
     ↓
@@ -50,19 +50,17 @@ RAZORPAY_KEY_ID=your_test_key_id_here
 RAZORPAY_KEY_SECRET=your_test_secret_here
 ```
 
-**Current Test Keys (for development):**
-```
-Key ID: rzp_test_1DP5mmOlF5G5ag
-Key Secret: w6pLP0MtznqWQvDNSmaBZ123
-```
+**Important:**
+- Do not use shared/sample keys from documentation.
+- Generate your own Test Key ID and Test Secret in your Razorpay account and use only those values.
 
 ### Step 3: Test the Payment Flow
 
 1. **Cash on Delivery (COD)** - Works as before
-2. **Online Payment** - New Razorpay integration
+2. **Razorpay** - New Razorpay integration
    - Add items to cart
    - Click "Place Order"
-   - Select "💳 Online Payment"
+  - Select "💳 Razorpay"
    - Click "Place Order" button
    - Razorpay modal will open
    - Use test card: `4111 1111 1111 1111` (Visa)

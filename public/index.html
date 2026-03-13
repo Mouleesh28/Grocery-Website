@@ -79,34 +79,67 @@
                     </div>
                 </div>
             </div>
-            <section class="home-categories" aria-label="Shop by category">
+            <section class="home-categories" aria-label="Popular categories">
                 <div class="section-head">
                     <div>
-                        <h3>Shop by category</h3>
+                        <h3>Popular Categories</h3>
                         <p>Tap a category to jump into fresh picks.</p>
                     </div>
                     <button class="btn btn-secondary" onclick="showPage('products')">View all</button>
                 </div>
-                <div class="category-cards-grid">
-                    <button class="category-card" onclick="showPage('products'); filterByCategory('fruits')" type="button">
-                        <span class="category-card-icon"><i class="fas fa-apple-alt"></i></span>
-                        <span class="category-card-label">Fruits</span>
-                    </button>
-                    <button class="category-card" onclick="showPage('products'); filterByCategory('vegetables')" type="button">
-                        <span class="category-card-icon"><i class="fas fa-carrot"></i></span>
-                        <span class="category-card-label">Vegetables</span>
-                    </button>
-                    <button class="category-card" onclick="showPage('products'); filterByCategory('grains')" type="button">
-                        <span class="category-card-icon"><i class="fas fa-bread-slice"></i></span>
-                        <span class="category-card-label">Grains</span>
-                    </button>
-                    <button class="category-card" onclick="showPage('products'); filterByCategory('dairy')" type="button">
-                        <span class="category-card-icon"><i class="fas fa-cheese"></i></span>
-                        <span class="category-card-label">Dairy</span>
-                    </button>
-                    <button class="category-card" onclick="showPage('products'); filterByCategory('oils')" type="button">
-                        <span class="category-card-icon"><i class="fas fa-pepper-hot"></i></span>
-                        <span class="category-card-label">Oils & Spices</span>
+                <div class="popular-categories-wrap">
+                    <div class="popular-categories-row" id="popularCategoriesRow">
+                        <button class="pop-cat-item" onclick="showPage('products'); filterByCategory('dairy')" type="button">
+                            <div class="pop-cat-img-wrap">
+                                <img src="https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=160&q=80" alt="Dairy" loading="lazy">
+                            </div>
+                            <span class="pop-cat-label">Dairy</span>
+                        </button>
+                        <button class="pop-cat-item" onclick="showPage('products'); filterByCategory('fruits')" type="button">
+                            <div class="pop-cat-img-wrap">
+                                <img src="https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?auto=format&fit=crop&w=160&q=80" alt="Fruits" loading="lazy">
+                            </div>
+                            <span class="pop-cat-label">Fruits</span>
+                        </button>
+                        <button class="pop-cat-item" onclick="showPage('products'); filterByCategory('vegetables')" type="button">
+                            <div class="pop-cat-img-wrap">
+                                <img src="https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&w=160&q=80" alt="Vegetables" loading="lazy">
+                            </div>
+                            <span class="pop-cat-label">Vegetables</span>
+                        </button>
+                        <button class="pop-cat-item" onclick="showPage('products'); filterByCategory('grains')" type="button">
+                            <div class="pop-cat-img-wrap">
+                                <img src="https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=160&q=80" alt="Grains" loading="lazy">
+                            </div>
+                            <span class="pop-cat-label">Grains</span>
+                        </button>
+                        <button class="pop-cat-item" onclick="showPage('products'); filterByCategory('oils')" type="button">
+                            <div class="pop-cat-img-wrap">
+                                <img src="https://images.unsplash.com/photo-1596040505149-c7998c523026?auto=format&fit=crop&w=160&q=80" alt="Oils & Ghee" loading="lazy">
+                            </div>
+                            <span class="pop-cat-label">Oils & Ghee</span>
+                        </button>
+                        <button class="pop-cat-item" onclick="showPage('products'); filterByCategory('spices')" type="button">
+                            <div class="pop-cat-img-wrap">
+                                <img src="https://images.unsplash.com/photo-1596040033229-a0b5e8fc2ff7?auto=format&fit=crop&w=160&q=80" alt="Spices & Masala" loading="lazy">
+                            </div>
+                            <span class="pop-cat-label">Spices & Masala</span>
+                        </button>
+                        <button class="pop-cat-item" onclick="showPage('products'); filterByCategory('makeup')" type="button">
+                            <div class="pop-cat-img-wrap">
+                                <img src="https://images.unsplash.com/photo-1585466620081-f5129b01bd2f?auto=format&fit=crop&w=160&q=80" alt="Makeup" loading="lazy">
+                            </div>
+                            <span class="pop-cat-label">Makeup</span>
+                        </button>
+                        <button class="pop-cat-item" onclick="showPage('products'); filterByCategory('shampoos')" type="button">
+                            <div class="pop-cat-img-wrap">
+                                <img src="https://images.unsplash.com/photo-1609137144813-f2350be90029?auto=format&fit=crop&w=160&q=80" alt="Shampoos" loading="lazy">
+                            </div>
+                            <span class="pop-cat-label">Shampoos</span>
+                        </button>
+                    </div>
+                    <button class="pop-cat-scroll-btn" onclick="scrollPopularCategories()" aria-label="Scroll categories right">
+                        <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
             </section>
@@ -206,6 +239,7 @@
                 <button class="category-tab" onclick="filterByCategory('grains')" data-category="grains">Grains</button>
                 <button class="category-tab" onclick="filterByCategory('dairy')" data-category="dairy">Dairy</button>
                 <button class="category-tab" onclick="filterByCategory('oils')" data-category="oils">Oils & Ghee</button>
+                <button class="category-tab" onclick="filterByCategory('spices')" data-category="spices">Spices & Masala</button>
                 <button class="category-tab" onclick="filterByCategory('makeup')" data-category="makeup">Makeup</button>
                 <button class="category-tab" onclick="filterByCategory('shampoos')" data-category="shampoos">Shampoos</button>
             </div>
@@ -357,10 +391,7 @@
                     <i class="fas fa-credit-card"></i>
                     <select id="paymentMode">
                         <option value="cod" data-i18n="payCOD">💵 Cash on Delivery</option>
-                        <option value="online" data-i18n="payOnline">💳 Online Payment</option>
-                        <option value="gpay" data-i18n="payGPay">🟢 Google Pay (GPay)</option>
-                        <option value="phonepe" data-i18n="payPhonePe">🔵 PhonePe</option>
-                        <option value="paytm" data-i18n="payPaytm">🔷 Paytm</option>
+                        <option value="razorpay" data-i18n="payRazorpay">💳 Razorpay</option>
                     </select>
                 </div>
                 <button class="btn btn-primary btn-full" onclick="placeOrder()" data-i18n="placeOrderBtn"><i class="fas fa-check-circle"></i> Place Order</button>

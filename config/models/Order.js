@@ -9,6 +9,7 @@ const orderSchema = new mongoose.Schema({
     paymentMethod: String, // "online", "gpay", "phonepe", "paytm"
     status: { type: String, default: "Pending" },
     paymentStatus: { type: String, default: "pending", enum: ["pending", "completed", "failed", "cancelled"] },
+    stockAdjusted: { type: Boolean, default: false },
     razorpayOrderId: String,
     razorpayPaymentId: String,
     razorpaySignature: String
